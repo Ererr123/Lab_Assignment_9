@@ -1,5 +1,6 @@
 #include <stdio.h>
-
+#include <stdlib.h>
+int recordSz;
 // RecordType
 struct RecordType
 {
@@ -11,13 +12,17 @@ struct RecordType
 // Fill out this structure
 struct HashType
 {
-
+	int id;
+	char name;
+	int order;
+	struct HashType* next;
 };
 
 // Compute the hash function
 int hash(int x)
 {
-
+	int newOrder = x % 11;
+	return newOrder;
 }
 
 // parses input file to an integer array
@@ -76,19 +81,69 @@ void printRecords(struct RecordType pData[], int dataSz)
 void displayRecordsInHash(struct HashType *pHashArray, int hashSz)
 {
 	int i;
-
-	for (i=0;i<hashSz;++i)
+	struct HashType *temp;
+	for (i=0;i<hashSz;i++)
 	{
-		// if index is occupied with any records, print all
+		if(pHashArray[i].name == ' ')
+		{
+			continue;
+		}
+		printf("Index %d: ", i);
+		for(temp = &pHashArray[i]; temp != NULL; temp = temp->next)
+			{
+				printf("Id: %d ", temp->id);
+				printf("Name: %c ", temp->name);
+				printf("Order: %d  ", temp->order);
+			}
+		printf("\n");
 	}
+	
 }
 
 int main(void)
 {
 	struct RecordType *pRecords;
 	int recordSz = 0;
-
+	struct HashType *temp1, *temp2;
 	recordSz = parseData("input.txt", &pRecords);
 	printRecords(pRecords, recordSz);
 	// Your hash implementation
+	int newOrder;
+	struct HashType hashCode[11];
+	for(int i = 0; i < 11; i++)
+	{
+		hashCode[i].id = 0;
+		hashCode[i].name = ' ';
+		hashCode[i].order = 0;
+		hashCode[i].next = NULL;
+	}
+	//hashCode = (struct HashType*) malloc(sizeof(struct HashType) * recordSz);
+	for(int i = 0; i < recordSz; i++)
+	{
+		int newOrder = hash(pRecords[i].id);
+		temp1 = (struct HashType*) malloc(sizeof(struct HashType));
+		temp1->id = pRecords[i].id;
+		temp1->name = pRecords[i].name;
+		temp1->order = pRecords[i].order;
+		temp1->next = NULL;
+
+		if(hashCode[newOrder].name == ' ')
+		{
+			hashCode[newOrder].id = temp1->id;
+			hashCode[newOrder].name = temp1->name;
+			hashCode[newOrder].order = temp1->order;
+			hashCode[newOrder].next = temp1->next;
+		}
+		else
+		{
+			for(temp2 = &hashCode[newOrder]; temp2->next != NULL; temp2 = temp2->next)
+			{
+				//get to end of linked list
+			}
+			temp2->next = temp1;
+		}
+	}
+	displayRecordsInHash(hashCode,11);
+	free(temp1);
+	free(pRecords);
 }
